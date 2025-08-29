@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文献榨汁机 - 智能论文分析系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(-45deg, #667eea, #764ba2, #667eea, #f093fb);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center">
+    <div class="container mx-auto px-6 text-center text-white">
+        <div class="floating mb-8">
+            <i class="fas fa-brain text-8xl mb-4 opacity-80"></i>
+        </div>
+        
+        <h1 class="text-6xl md:text-8xl font-bold mb-6" style="font-family: 'Orbitron', monospace;">
+            文献榨汁机
+        </h1>
+        
+        <p class="text-xl md:text-2xl mb-12 max-w-4xl mx-auto opacity-90">
+            把人类"看不懂"的东西，转化成"能理解、能使用"的知识资产
+        </p>
+        
+        <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <!-- 产品介绍卡片 -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 card-hover cursor-pointer" onclick="window.location.href='文献榨汁机.html'">
+                <div class="mb-6">
+                    <i class="fas fa-presentation text-6xl text-purple-300 mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-4">产品介绍</h3>
+                </div>
+                <p class="text-gray-200 mb-6 leading-relaxed">
+                    了解文献榨汁机的核心价值、解决的痛点、功能特性和应用场景
+                </p>
+                <div class="flex items-center justify-center text-purple-300 font-semibold">
+                    <span class="mr-2">查看详细介绍</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+            
+            <!-- 立即体验卡片 -->
+            <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 card-hover cursor-pointer" onclick="window.location.href='start.html'">
+                <div class="mb-6">
+                    <i class="fas fa-rocket text-6xl text-blue-300 mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-4">立即体验</h3>
+                </div>
+                <p class="text-gray-200 mb-6 leading-relaxed">
+                    直接体验完整功能：上传论文、智能分解、知识图谱、深度对话
+                </p>
+                <div class="flex items-center justify-center text-blue-300 font-semibold">
+                    <span class="mr-2">开始体验</span>
+                    <i class="fas fa-play"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-12 text-sm text-gray-300 opacity-75">
+            💡 建议先查看产品介绍，了解核心价值后再体验功能
+        </div>
+    </div>
+    
+    <!-- 背景装饰 -->
+    <div class="fixed top-20 left-10 w-32 h-32 bg-white opacity-10 rounded-full blur-xl"></div>
+    <div class="fixed bottom-20 right-10 w-48 h-48 bg-purple-300 opacity-10 rounded-full blur-xl"></div>
+    <div class="fixed top-1/2 left-1/4 w-64 h-64 bg-blue-300 opacity-5 rounded-full blur-3xl"></div>
+</body>
+</html>

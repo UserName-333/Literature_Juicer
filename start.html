@@ -1,0 +1,2253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文献榨汁机 - 智能论文分析系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                            950: '#082f49',
+                        },
+                        neon: {
+                            blue: '#00d4ff',
+                            purple: '#a855f7',
+                            green: '#22d3ee',
+                            pink: '#ec4899'
+                        }
+                    },
+                    backgroundImage: {
+                        'cyber-gradient': 'linear-gradient(135deg, #0c1428 0%, #1e293b 50%, #0f172a 100%)',
+                        'neon-gradient': 'linear-gradient(45deg, #00d4ff, #a855f7)',
+                        'analysis-gradient': 'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                        'float': 'float 6s ease-in-out infinite',
+                        'scan': 'scan 2s linear infinite',
+                        'typewriter': 'typewriter 4s steps(40) 1s forwards'
+                    },
+                    keyframes: {
+                        glow: {
+                            '0%': { 
+                                'box-shadow': '0 0 20px rgba(0, 212, 255, 0.5)',
+                                'border-color': 'rgba(0, 212, 255, 0.5)'
+                            },
+                            '100%': { 
+                                'box-shadow': '0 0 40px rgba(0, 212, 255, 0.8)',
+                                'border-color': 'rgba(0, 212, 255, 0.8)'
+                            }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' }
+                        },
+                        scan: {
+                            '0%': { transform: 'translateX(-100%)' },
+                            '100%': { transform: 'translateX(100vw)' }
+                        },
+                        typewriter: {
+                            '0%': { width: '0' },
+                            '100%': { width: '100%' }
+                        }
+                    },
+                    fontFamily: {
+                        'cyber': ['Orbitron', 'monospace'],
+                        'mono': ['Fira Code', 'monospace']
+                    }
+                },
+            },
+        }
+    </script>
+    
+    <style>
+        * {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c1428 0%, #1e293b 50%, #0f172a 100%);
+            overflow-x: hidden;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        
+        /* 霓虹灯效果 */
+        .neon-border {
+            border: 1px solid rgba(0, 212, 255, 0.5);
+            box-shadow: 
+                0 0 10px rgba(0, 212, 255, 0.3),
+                inset 0 0 10px rgba(0, 212, 255, 0.1);
+        }
+        
+        .neon-border:hover {
+            border-color: #00d4ff;
+            box-shadow: 
+                0 0 20px rgba(0, 212, 255, 0.6),
+                inset 0 0 20px rgba(0, 212, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        /* 发光按钮 */
+        .glow-button {
+            background: linear-gradient(to right, #00d4ff, #a855f7);
+            color: white;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            transform: scale(1);
+            box-shadow: 
+                0 0 20px rgba(0, 212, 255, 0.4),
+                0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .glow-button:hover {
+            transform: scale(1.05);
+            box-shadow: 
+                0 0 30px rgba(0, 212, 255, 0.6),
+                0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* 科幻卡片 */
+        .cyber-card {
+            background: linear-gradient(135deg, 
+                rgba(30, 41, 59, 0.4) 0%, 
+                rgba(51, 65, 85, 0.3) 50%, 
+                rgba(30, 41, 59, 0.4) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .cyber-card:hover {
+            border-color: rgba(0, 212, 255, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 
+                0 0 25px rgba(0, 212, 255, 0.2),
+                0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 输入框样式 */
+        .cyber-input {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgb(71, 85, 105);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .cyber-input::placeholder {
+            color: rgb(148, 163, 184);
+        }
+        
+        .cyber-input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        /* 进度条 */
+        .progress-bar {
+            height: 8px;
+            background: rgb(51, 65, 85);
+            border-radius: 9999px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #00d4ff, #a855f7);
+            border-radius: 9999px;
+            transition: all 0.5s ease;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+        
+        /* 消息气泡布局 - 移除了老的背景样式 */
+        
+        /* 语言按钮 */
+        .language-btn {
+            padding: 8px 16px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgb(71, 85, 105);
+            border-radius: 8px;
+            color: rgb(203, 213, 225);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .language-btn:hover {
+            background: rgba(51, 65, 85, 0.5);
+            border-color: rgb(100, 116, 139);
+            color: white;
+        }
+        
+        .language-btn.active {
+            background: linear-gradient(45deg, #00d4ff, #a855f7);
+            border-color: #00d4ff;
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        /* 科幻按钮 */
+        .cyber-button {
+            padding: 8px 16px;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 6px;
+            color: #00d4ff;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .cyber-button:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: #00d4ff;
+            color: white;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        /* 文档节点动画 */
+        .doc-section.processing {
+            background: rgba(0, 212, 255, 0.1);
+            border-left-color: #00d4ff;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        .doc-section.completed {
+            background: rgba(34, 197, 94, 0.1);
+            border-left-color: #22c55e;
+        }
+        
+        /* 分块样式 */
+        .chunk-item {
+            padding: 8px 12px;
+            background: rgba(51, 65, 85, 0.3);
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .chunk-item:hover {
+            background: rgba(71, 85, 105, 0.4);
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+        
+        .chunk-item.active {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: #00d4ff;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+        
+        /* 神经网络画布样式 */
+        #neural-network-canvas {
+            cursor: grab;
+        }
+        
+        #neural-network-canvas:active {
+            cursor: grabbing;
+        }
+        
+        /* 数字动画 */
+        .count-up {
+            animation: countUp 2s ease-out forwards;
+        }
+        
+        @keyframes countUp {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* 通知队列样式 */
+        #notification-container {
+            pointer-events: none;
+        }
+
+        .notification-item {
+            pointer-events: auto;
+            max-width: 320px;
+            backdrop-filter: blur(10px);
+            animation: slideInFromRight 0.3s ease-out;
+        }
+
+        .notification-item:hover {
+            transform: translateX(-5px) !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .notification-item button {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .notification-item:hover button {
+            opacity: 1;
+        }
+
+        @keyframes slideInFromRight {
+            from {
+                transform: translateX(100%) scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+                        @keyframes slideOutToRight {
+                    from {
+                        transform: translateX(0) scale(1);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translateX(100%) scale(0.8);
+                        opacity: 0;
+                    }
+                }
+
+                /* 打字机效果 */
+                .typewriter {
+                    overflow: hidden;
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                }
+
+                .typewriter-cursor {
+                    display: inline-block;
+                    width: 2px;
+                    height: 1.2em;
+                    background-color: #00d4ff;
+                    margin-left: 2px;
+                    animation: blink 1s infinite;
+                }
+
+                @keyframes blink {
+                    0%, 50% { opacity: 1; }
+                    51%, 100% { opacity: 0; }
+                }
+
+                .typing-indicator {
+                    display: inline-flex;
+                    align-items: center;
+                    padding: 8px 12px;
+                    background: rgba(100, 116, 139, 0.3);
+                    border-radius: 12px;
+                    margin: 8px 0;
+                }
+
+                .typing-indicator .dot {
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background-color: #64748b;
+                    margin: 0 2px;
+                    animation: typingDots 1.4s infinite;
+                }
+
+                .typing-indicator .dot:nth-child(2) {
+                    animation-delay: 0.2s;
+                }
+
+                .typing-indicator .dot:nth-child(3) {
+                    animation-delay: 0.4s;
+                }
+
+                @keyframes typingDots {
+                    0%, 60%, 100% {
+                        transform: translateY(0);
+                        opacity: 0.4;
+                    }
+                    30% {
+                        transform: translateY(-10px);
+                        opacity: 1;
+                    }
+                }
+
+                @keyframes slideInUp {
+                    from {
+                        transform: translateY(20px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateY(0);
+                        opacity: 1;
+                    }
+                }
+
+                /* 消息气泡样式 */
+                .message-bubble {
+                    animation: messageAppear 0.4s ease-out;
+                }
+
+                .message-user {
+                    transform-origin: bottom right;
+                }
+
+                .message-ai {
+                    transform-origin: bottom left;
+                }
+
+                @keyframes messageAppear {
+                    from {
+                        opacity: 0;
+                        transform: translateY(15px) scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
+                }
+
+                /* 改进打字机样式 */
+                .typewriter {
+                    min-height: 1.25rem;
+                }
+
+                .typewriter-text {
+                    display: inline;
+                }
+
+                .typewriter-cursor {
+                    display: inline-block;
+                    width: 1px;
+                    height: 1em;
+                    background-color: #00d4ff;
+                    margin-left: 1px;
+                    animation: blink 0.8s infinite;
+                    vertical-align: baseline;
+                    opacity: 0.8;
+                }
+        
+        /* Markdown 样式 */
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+            color: #00d4ff;
+            font-weight: 600;
+            margin-bottom: 16px;
+            margin-top: 24px;
+        }
+        
+        .markdown-content h1 { font-size: 1.5rem; }
+        .markdown-content h2 { font-size: 1.25rem; }
+        .markdown-content h3 { font-size: 1.125rem; }
+        
+        .markdown-content p {
+            margin-bottom: 16px;
+            line-height: 1.7;
+        }
+        
+        .markdown-content ul, .markdown-content ol {
+            margin-bottom: 16px;
+            margin-left: 24px;
+        }
+        
+        .markdown-content li {
+            margin-bottom: 8px;
+        }
+        
+        .markdown-content code {
+            background: rgb(30, 41, 59);
+            color: #22d3ee;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.875rem;
+        }
+        
+        .markdown-content pre {
+            background: rgb(15, 23, 42);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+        }
+        
+        .markdown-content blockquote {
+            border-left: 4px solid #00d4ff;
+            padding-left: 16px;
+            font-style: italic;
+            color: rgb(203, 213, 225);
+            margin-bottom: 16px;
+        }
+        
+        /* 扫描线动画 */
+        @keyframes scan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100vw); }
+        }
+        
+        .scan-line {
+            animation: scan 3s linear infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- 背景装饰 -->
+    <div class="fixed inset-0 pointer-events-none">
+        <div class="absolute top-20 left-10 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-cyan-500/3 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- 扫描线效果 -->
+    <div class="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-30 scan-line"></div>
+
+    <div id="app" class="relative z-10">
+        <!-- 导航栏 -->
+        <nav class="border-b border-slate-700/50 backdrop-blur-sm bg-slate-900/20">
+            <div class="max-w-7xl mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-purple-500 rounded-lg flex items-center justify-center animate-pulse">
+                            <span class="text-xl">🤖</span>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-white" style="font-family: 'Orbitron', monospace;">文献榨汁机</h1>
+                            <p class="text-sm text-slate-400">智能论文分析系统</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="window.location.href='文献榨汁机.html'" class="px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg text-purple-300 hover:bg-purple-500/30 hover:text-white transition-all">
+                            <i class="fas fa-arrow-left mr-2"></i>返回介绍
+                        </button>
+                        <button id="restart-analysis" onclick="app.restartAnalysis()" class="px-4 py-2 bg-cyan-500/20 border border-cyan-500/30 rounded-lg text-cyan-300 hover:bg-cyan-500/30 hover:text-white transition-all hidden">
+                            <i class="fas fa-refresh mr-2"></i>重新分析
+                        </button>
+                        <button id="new-document" onclick="app.uploadNewDocument()" class="px-4 py-2 bg-orange-500/20 border border-orange-500/30 rounded-lg text-orange-300 hover:bg-orange-500/30 hover:text-white transition-all hidden">
+                            <i class="fas fa-plus mr-2"></i>新文档
+                        </button>
+                        <div class="px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full">
+                            <span class="text-green-400 text-sm" style="font-family: 'Fira Code', monospace;">● 系统在线</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- 主要内容区域 -->
+        <main class="max-w-7xl mx-auto px-6 py-8">
+            <!-- 上传区域 -->
+            <div id="upload-section" class="mb-8">
+                <div class="cyber-card p-8 text-center">
+                    <div class="mb-6">
+                        <div class="w-24 h-24 mx-auto bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center mb-4 animate-bounce">
+                            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-3xl font-bold text-white mb-2" style="font-family: 'Orbitron', monospace;">上传您的学术论文</h2>
+                        <p class="text-slate-400 text-lg">支持 PDF、DOC、DOCX、TXT 格式，获得专业的AI分析</p>
+                    </div>
+
+                    <!-- 文件上传区 -->
+                    <div class="mb-6">
+                        <div id="drop-zone" class="border-2 border-dashed border-slate-600 rounded-xl p-8 transition-all duration-300 hover:border-blue-400/50 hover:bg-slate-800/20 cursor-pointer">
+                            <input type="file" id="file-input" class="hidden" accept=".pdf,.doc,.docx,.txt">
+                            <div class="text-center">
+                                <svg class="w-16 h-16 mx-auto text-slate-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <p class="text-slate-300 text-lg mb-2">拖拽文件到此处或点击选择</p>
+                                <p class="text-slate-500 text-sm">最大支持 50MB</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 语言选择 -->
+                    <div class="mb-6">
+                        <h3 class="text-white font-semibold mb-4">选择分析语言</h3>
+                        <div class="flex flex-wrap justify-center gap-3">
+                            <button class="language-btn active" data-lang="中文">中文</button>
+                            <button class="language-btn" data-lang="English">English</button>
+                            <button class="language-btn" data-lang="日本語">日本語</button>
+                            <button class="language-btn" data-lang="Français">Français</button>
+                            <button class="language-btn" data-lang="Deutsch">Deutsch</button>
+                        </div>
+                    </div>
+
+                    <!-- 开始分析按钮 -->
+                    <button id="analyze-btn" class="glow-button text-lg px-8 py-4 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <span class="flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            开始AI分析
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 分析进度区域 -->
+            <div id="analysis-section" class="mb-8 hidden">
+                <!-- 论文分解过程 -->
+                <div id="chunking-section" class="cyber-card p-6 mb-6">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-bold text-white mb-2" style="font-family: 'Orbitron', monospace;">📄 论文智能分解</h3>
+                        <p class="text-slate-400">正在将论文拆分为语义块，便于AI深度理解</p>
+                    </div>
+                    
+                    <!-- 分解可视化 -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- 原文档结构 -->
+                        <div class="space-y-4">
+                            <h4 class="text-cyan-400 font-semibold mb-3">📖 原始文档结构</h4>
+                            <div id="document-structure" class="space-y-2">
+                                <div class="doc-section border-l-4 border-blue-400 pl-4 py-2 bg-slate-800/30 rounded-r transition-all duration-500" data-section="title">
+                                    <div class="text-white font-medium">标题与作者信息</div>
+                                    <div class="text-slate-400 text-sm">Deep Learning for Academic Paper Analysis...</div>
+                                </div>
+                                <div class="doc-section border-l-4 border-purple-400 pl-4 py-2 bg-slate-800/30 rounded-r transition-all duration-500" data-section="abstract">
+                                    <div class="text-white font-medium">摘要</div>
+                                    <div class="text-slate-400 text-sm">Abstract section with key findings...</div>
+                                </div>
+                                <div class="doc-section border-l-4 border-green-400 pl-4 py-2 bg-slate-800/30 rounded-r transition-all duration-500" data-section="introduction">
+                                    <div class="text-white font-medium">引言</div>
+                                    <div class="text-slate-400 text-sm">Introduction and background...</div>
+                                </div>
+                                <div class="doc-section border-l-4 border-yellow-400 pl-4 py-2 bg-slate-800/30 rounded-r transition-all duration-500" data-section="methodology">
+                                    <div class="text-white font-medium">方法论</div>
+                                    <div class="text-slate-400 text-sm">Research methods and approach...</div>
+                                </div>
+                                <div class="doc-section border-l-4 border-red-400 pl-4 py-2 bg-slate-800/30 rounded-r transition-all duration-500" data-section="results">
+                                    <div class="text-white font-medium">实验结果</div>
+                                    <div class="text-slate-400 text-sm">Results and findings...</div>
+                                </div>
+                                <div class="doc-section border-l-4 border-pink-400 pl-4 py-2 bg-slate-800/30 rounded-r transition-all duration-500" data-section="conclusion">
+                                    <div class="text-white font-medium">结论</div>
+                                    <div class="text-slate-400 text-sm">Conclusions and future work...</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 智能分块结果 -->
+                        <div class="space-y-4">
+                            <h4 class="text-cyan-400 font-semibold mb-3">🧩 智能语义分块</h4>
+                            <div id="chunk-container" class="space-y-2 min-h-[300px]">
+                                <!-- 动态生成的chunk将显示在这里 -->
+                            </div>
+                            
+                            <!-- 分块统计 -->
+                            <div class="mt-4 p-3 bg-slate-900/50 rounded-lg border border-slate-700">
+                                <div class="grid grid-cols-3 gap-4 text-center">
+                                    <div>
+                                        <div class="text-2xl font-bold text-cyan-400" id="chunk-count">0</div>
+                                        <div class="text-xs text-slate-400">语义块</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-2xl font-bold text-green-400" id="avg-chunk-size">0</div>
+                                        <div class="text-xs text-slate-400">平均大小</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-2xl font-bold text-purple-400" id="total-tokens">0</div>
+                                        <div class="text-xs text-slate-400">总Token数</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AI分析进度 -->
+                <div class="cyber-card p-6">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-bold text-white mb-2" style="font-family: 'Orbitron', monospace;">🤖 AI深度分析</h3>
+                        <p class="text-slate-400">基于语义分块，进行多维度智能分析</p>
+                    </div>
+                    
+                    <!-- 进度显示 -->
+                    <div class="space-y-4">
+                        <div class="analysis-step" data-step="extract">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-white font-medium">📄 内容理解与向量化</span>
+                                <span class="step-status text-slate-400">待处理</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-step" data-step="snapshot">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-white font-medium">📊 生成学术快照</span>
+                                <span class="step-status text-slate-400">待处理</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-step" data-step="methodology">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-white font-medium">🔬 方法论深度分析</span>
+                                <span class="step-status text-slate-400">待处理</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-step" data-step="evaluation">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-white font-medium">💎 构建知识图谱</span>
+                                <span class="step-status text-slate-400">待处理</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 神经网络图谱 -->
+            <div id="neural-network-section" class="mb-8 hidden">
+                <div class="cyber-card p-6">
+                    <div class="text-center mb-6">
+                        <h3 class="text-2xl font-bold text-white mb-2" style="font-family: 'Orbitron', monospace;">🧠 论文知识神经网络</h3>
+                        <p class="text-slate-400">基于AI分析构建的多维知识图谱，点击节点探索相关内容</p>
+                    </div>
+                    
+                    <!-- 网络图谱容器 -->
+                    <div class="relative">
+                        <canvas id="neural-network-canvas" class="w-full h-96 bg-slate-900/30 rounded-lg border border-slate-700"></canvas>
+                        
+                        <!-- 节点信息面板 -->
+                        <div id="node-info-panel" class="absolute top-4 right-4 w-80 bg-slate-800/90 backdrop-blur-sm border border-slate-600 rounded-lg p-4 hidden">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 id="node-title" class="text-white font-bold">节点信息</h4>
+                                <button id="close-panel" class="text-slate-400 hover:text-white">✕</button>
+                            </div>
+                            <div id="node-content" class="text-slate-300 text-sm"></div>
+                            <button id="search-node" class="mt-3 w-full glow-button text-sm py-2">🚀 智能知识拓展</button>
+                        </div>
+                        
+                        <!-- 搜索结果模态框 -->
+                        <div id="search-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+                            <div class="cyber-card max-w-4xl w-full max-h-[80vh] overflow-hidden m-4">
+                                <div class="flex items-center justify-between p-6 border-b border-slate-700">
+                                    <h3 class="text-xl font-bold text-white">🔍 互联网搜索结果</h3>
+                                    <button id="close-search-modal" class="text-slate-400 hover:text-white text-xl">✕</button>
+                                </div>
+                                <div id="search-results" class="p-6 overflow-y-auto max-h-[60vh]">
+                                    <!-- 搜索结果将在这里显示 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 图谱控制面板 -->
+                    <div class="mt-6 flex flex-wrap gap-4 justify-center">
+                        <button id="reset-network" class="cyber-button">🔄 重置视图</button>
+                        <button id="toggle-labels" class="cyber-button">🏷️ 切换标签</button>
+                        <button id="auto-layout" class="cyber-button">✨ 自动布局</button>
+                        <button id="export-network" class="cyber-button">💾 导出图谱</button>
+                    </div>
+                    
+                    <!-- 图例 -->
+                    <div class="mt-4 flex flex-wrap gap-6 justify-center text-sm">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-blue-400 rounded-full mr-2"></div>
+                            <span class="text-slate-300">核心概念</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-purple-400 rounded-full mr-2"></div>
+                            <span class="text-slate-300">研究方法</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-green-400 rounded-full mr-2"></div>
+                            <span class="text-slate-300">实验结果</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-yellow-400 rounded-full mr-2"></div>
+                            <span class="text-slate-300">关键术语</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-red-400 rounded-full mr-2"></div>
+                            <span class="text-slate-300">应用领域</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- 对话区域 -->
+            <div id="chat-section" class="hidden">
+                <div class="cyber-card p-6">
+                    <div class="flex items-center mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-purple-500 rounded-lg flex items-center justify-center mr-4 animate-pulse">
+                            <span class="text-xl">💬</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white" style="font-family: 'Orbitron', monospace;">与论文对话</h3>
+                            <p class="text-slate-400">基于分析结果，深入探讨论文内容</p>
+                        </div>
+                    </div>
+
+                    <!-- 聊天消息区域 -->
+                    <div id="chat-messages" class="h-96 overflow-y-auto mb-4 p-4 bg-slate-900/30 rounded-lg border border-slate-700/50">
+                        <!-- 消息将通过JavaScript动态添加 -->
+                    </div>
+
+                    <!-- 快捷操作 -->
+                    <div class="mb-4 p-4 bg-slate-800/30 rounded-lg border border-slate-600/30">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-sm font-semibold text-slate-300" style="font-family: 'Orbitron', monospace;">
+                                <i class="fas fa-bolt mr-2 text-yellow-400"></i>快捷操作
+                            </h4>
+                            <div class="flex space-x-2 text-xs">
+                                <span class="px-2 py-1 bg-cyan-500/20 text-cyan-300 rounded">Ctrl+R</span>
+                                <span class="px-2 py-1 bg-orange-500/20 text-orange-300 rounded">Ctrl+N</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <button onclick="app.restartAnalysis()" class="px-3 py-2 bg-cyan-500/10 border border-cyan-500/30 rounded text-cyan-300 hover:bg-cyan-500/20 transition-all text-sm">
+                                <i class="fas fa-refresh mr-2"></i>重新分析
+                            </button>
+                            <button onclick="app.uploadNewDocument()" class="px-3 py-2 bg-orange-500/10 border border-orange-500/30 rounded text-orange-300 hover:bg-orange-500/20 transition-all text-sm">
+                                <i class="fas fa-plus mr-2"></i>新文档
+                            </button>
+                            <button onclick="app.exportCurrentSession()" class="px-3 py-2 bg-purple-500/10 border border-purple-500/30 rounded text-purple-300 hover:bg-purple-500/20 transition-all text-sm">
+                                <i class="fas fa-download mr-2"></i>导出
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 输入区域 -->
+                    <div class="flex space-x-3">
+                        <input type="text" id="chat-input" class="flex-1 cyber-input" placeholder="输入您的问题...">
+                        <button id="send-btn" class="glow-button px-6">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 分块数据
+        const mockChunkData = [
+            { id: 1, type: 'title', content: '标题: Deep Learning for Academic Paper Analysis: A Comprehensive Framework', tokens: 142 },
+            { id: 2, type: 'abstract', content: '摘要: This paper presents a comprehensive framework for academic paper analysis using deep learning techniques...', tokens: 256 },
+            { id: 3, type: 'introduction', content: '引言: With the exponential growth of academic literature, there is an urgent need for automated analysis tools...', tokens: 312 },
+            { id: 4, type: 'methodology', content: '方法: We propose a multi-modal approach that combines text analysis, graph neural networks, and attention mechanisms...', tokens: 387 },
+            { id: 5, type: 'experiment', content: '实验: Our experiments were conducted on a dataset of 1 million academic papers across various domains...', tokens: 298 },
+            { id: 6, type: 'results', content: '结果: The proposed framework achieves 89.3% accuracy in paper classification and generates meaningful insights...', tokens: 275 },
+            { id: 7, type: 'discussion', content: '讨论: The results demonstrate the effectiveness of our approach in handling multi-modal academic content...', tokens: 234 },
+            { id: 8, type: 'conclusion', content: '结论: This work provides a foundation for automated academic paper analysis and opens new research directions...', tokens: 198 },
+            { id: 9, type: 'references', content: '参考文献: [1] Smith, J. et al. (2023). Deep Learning for Text Analysis. [2] Brown, A. (2022). Academic Mining...', tokens: 156 }
+        ];
+
+        // 神经网络节点数据
+        const mockNetworkData = {
+            nodes: [
+                { id: 'deep_learning', label: 'Deep Learning', type: 'concept', x: 400, y: 200, color: '#60a5fa', description: '深度学习是机器学习的子集，使用多层神经网络来学习数据的复杂模式' },
+                { id: 'nlp', label: 'NLP', type: 'method', x: 300, y: 150, color: '#a855f7', description: '自然语言处理技术，用于理解和生成人类语言' },
+                { id: 'transformer', label: 'Transformer', type: 'method', x: 500, y: 150, color: '#a855f7', description: 'Transformer架构，基于注意力机制的神经网络模型' },
+                { id: 'bert', label: 'BERT', type: 'result', x: 250, y: 100, color: '#22d3ee', description: 'BERT是基于Transformer的预训练语言模型' },
+                { id: 'attention', label: 'Attention', type: 'term', x: 550, y: 100, color: '#eab308', description: '注意力机制允许模型关注输入序列的不同部分' },
+                { id: 'academic_analysis', label: 'Academic Analysis', type: 'application', x: 400, y: 300, color: '#ef4444', description: '学术论文分析的自动化处理技术' },
+                { id: 'text_mining', label: 'Text Mining', type: 'method', x: 200, y: 250, color: '#a855f7', description: '从非结构化文本中提取有用信息的过程' },
+                { id: 'knowledge_graph', label: 'Knowledge Graph', type: 'result', x: 600, y: 250, color: '#22d3ee', description: '知识图谱用于表示实体之间的关系' },
+                { id: 'citation_analysis', label: 'Citation Analysis', type: 'application', x: 300, y: 350, color: '#ef4444', description: '引用分析用于评估学术影响力' },
+                { id: 'semantic_search', label: 'Semantic Search', type: 'application', x: 500, y: 350, color: '#ef4444', description: '语义搜索基于内容含义而非关键词匹配' }
+            ],
+            edges: [
+                { from: 'deep_learning', to: 'nlp', strength: 0.8 },
+                { from: 'deep_learning', to: 'transformer', strength: 0.9 },
+                { from: 'nlp', to: 'bert', strength: 0.7 },
+                { from: 'transformer', to: 'bert', strength: 0.8 },
+                { from: 'transformer', to: 'attention', strength: 0.9 },
+                { from: 'deep_learning', to: 'academic_analysis', strength: 0.6 },
+                { from: 'nlp', to: 'text_mining', strength: 0.7 },
+                { from: 'academic_analysis', to: 'citation_analysis', strength: 0.5 },
+                { from: 'academic_analysis', to: 'semantic_search', strength: 0.6 },
+                { from: 'text_mining', to: 'knowledge_graph', strength: 0.4 },
+                { from: 'knowledge_graph', to: 'semantic_search', strength: 0.5 }
+            ]
+        };
+
+
+
+        // 状态管理
+        class LiteratureJuicerApp {
+            constructor() {
+                this.currentStep = 'upload'
+                this.selectedLanguage = '中文'
+                this.selectedFile = null
+                this.analysisProgress = {
+                    extract: 0,
+                    snapshot: 0,
+                    methodology: 0,
+                    evaluation: 0
+                }
+                this.init()
+            }
+
+            init() {
+                this.setupEventListeners()
+                this.setupKeyboardShortcuts()
+                this.setupFileUpload()
+                this.setupLanguageSelection()
+                this.setupChat()
+                this.setupNeuralNetwork()
+            }
+
+            setupEventListeners() {
+                // 分析按钮
+                document.getElementById('analyze-btn').addEventListener('click', () => {
+                    if (this.selectedFile) {
+                        this.startAnalysis()
+                    }
+                })
+
+                // 发送消息按钮
+                document.getElementById('send-btn').addEventListener('click', () => {
+                    this.sendMessage()
+                })
+
+                // 输入框回车
+                document.getElementById('chat-input').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.sendMessage()
+                    }
+                })
+            }
+
+            setupFileUpload() {
+                const dropZone = document.getElementById('drop-zone')
+                const fileInput = document.getElementById('file-input')
+
+                // 点击上传
+                dropZone.addEventListener('click', () => {
+                    fileInput.click()
+                })
+
+                // 文件选择
+                fileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0]
+                    if (file) {
+                        this.handleFileSelect(file)
+                    }
+                })
+
+                // 拖拽上传
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault()
+                    dropZone.style.borderColor = '#00d4ff'
+                    dropZone.style.backgroundColor = 'rgba(30, 41, 59, 0.3)'
+                })
+
+                dropZone.addEventListener('dragleave', (e) => {
+                    e.preventDefault()
+                    dropZone.style.borderColor = 'rgb(71, 85, 105)'
+                    dropZone.style.backgroundColor = 'transparent'
+                })
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault()
+                    dropZone.style.borderColor = 'rgb(71, 85, 105)'
+                    dropZone.style.backgroundColor = 'transparent'
+                    
+                    const files = e.dataTransfer.files
+                    if (files.length > 0) {
+                        this.handleFileSelect(files[0])
+                    }
+                })
+            }
+
+            handleFileSelect(file) {
+                // 文件类型验证
+                const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain']
+                if (!allowedTypes.includes(file.type)) {
+                    this.showNotification('请选择 PDF、DOC、DOCX 或 TXT 格式的文件', 'error')
+                    return
+                }
+
+                // 文件大小验证 (50MB)
+                if (file.size > 50 * 1024 * 1024) {
+                    this.showNotification('文件大小不能超过 50MB', 'error')
+                    return
+                }
+
+                this.selectedFile = file
+                
+                // 更新UI
+                const dropZone = document.getElementById('drop-zone')
+                dropZone.innerHTML = `
+                    <div class="text-center">
+                        <div class="w-16 h-16 mx-auto bg-green-500/20 rounded-full flex items-center justify-center mb-4">
+                            <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-green-400 text-lg font-semibold">${file.name}</p>
+                        <p class="text-slate-400 text-sm">${this.formatFileSize(file.size)} • ${file.type.split('/')[1].toUpperCase()}</p>
+                        <button class="mt-3 text-blue-400 hover:text-white transition-colors" onclick="app.clearFile()">更换文件</button>
+                    </div>
+                `
+
+                // 启用分析按钮
+                document.getElementById('analyze-btn').disabled = false
+                
+                this.showNotification('文件上传成功！', 'success')
+            }
+
+            clearFile() {
+                this.selectedFile = null
+                document.getElementById('file-input').value = ''
+                document.getElementById('analyze-btn').disabled = true
+                
+                // 重置上传区域
+                const dropZone = document.getElementById('drop-zone')
+                dropZone.innerHTML = `
+                    <div class="text-center">
+                        <svg class="w-16 h-16 mx-auto text-slate-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <p class="text-slate-300 text-lg mb-2">拖拽文件到此处或点击选择</p>
+                        <p class="text-slate-500 text-sm">最大支持 50MB</p>
+                    </div>
+                `
+            }
+
+            setupLanguageSelection() {
+                const languageButtons = document.querySelectorAll('.language-btn')
+                
+                languageButtons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        // 移除其他按钮的active状态
+                        languageButtons.forEach(b => b.classList.remove('active'))
+                        // 添加当前按钮的active状态
+                        btn.classList.add('active')
+                        this.selectedLanguage = btn.dataset.lang
+                    })
+                })
+            }
+
+            startAnalysis() {
+                // 隐藏上传区域，显示分析区域
+                document.getElementById('upload-section').classList.add('hidden')
+                document.getElementById('analysis-section').classList.remove('hidden')
+
+                this.showNotification(`开始分析 "${this.selectedFile.name}"`, 'info')
+
+                // 模拟分析过程
+                this.simulateAnalysis()
+            }
+
+            async simulateAnalysis() {
+                // 首先进行分块处理
+                await this.simulateChunking()
+                
+                // 然后进行AI分析
+                const steps = ['extract', 'snapshot', 'methodology', 'evaluation']
+                
+                for (let i = 0; i < steps.length; i++) {
+                    const step = steps[i]
+                    const stepElement = document.querySelector(`[data-step="${step}"]`)
+                    const statusElement = stepElement.querySelector('.step-status')
+                    const progressElement = stepElement.querySelector('.progress-fill')
+
+                    // 更新状态为处理中
+                    statusElement.textContent = '处理中...'
+                    statusElement.style.color = '#00d4ff'
+
+                    // 模拟进度
+                    await this.animateProgress(progressElement, 0, 100, 2000)
+
+                    // 更新状态为完成
+                    statusElement.textContent = '✓ 完成'
+                    statusElement.style.color = '#22c55e'
+
+                    // 短暂延迟
+                    await this.delay(500)
+                }
+
+                // 分析完成，显示神经网络图谱
+                this.showNeuralNetwork()
+            }
+
+            async simulateChunking() {
+                const docSections = document.querySelectorAll('.doc-section')
+                const chunkContainer = document.getElementById('chunk-container')
+                let totalTokens = 0
+                
+                // 逐个处理文档节点
+                for (let i = 0; i < docSections.length; i++) {
+                    const section = docSections[i]
+                    section.classList.add('processing')
+                    
+                    await this.delay(800)
+                    
+                    // 生成对应的分块
+                    const chunks = this.generateChunksForSection(section.dataset.section)
+                    for (const chunk of chunks) {
+                        await this.addChunkToContainer(chunkContainer, chunk)
+                        totalTokens += chunk.tokens
+                        this.updateChunkStats(i + 1, totalTokens)
+                        await this.delay(300)
+                    }
+                    
+                    section.classList.remove('processing')
+                    section.classList.add('completed')
+                }
+                
+                await this.delay(1000)
+            }
+
+            generateChunksForSection(sectionType) {
+                return mockChunkData.filter(chunk => 
+                    chunk.type === sectionType || 
+                    (sectionType === 'title' && chunk.type === 'title') ||
+                    (sectionType === 'abstract' && chunk.type === 'abstract') ||
+                    (sectionType === 'introduction' && chunk.type === 'introduction') ||
+                    (sectionType === 'methodology' && ['methodology', 'experiment'].includes(chunk.type)) ||
+                    (sectionType === 'results' && ['results', 'discussion'].includes(chunk.type)) ||
+                    (sectionType === 'conclusion' && ['conclusion', 'references'].includes(chunk.type))
+                )
+            }
+
+            async addChunkToContainer(container, chunk) {
+                const chunkDiv = document.createElement('div')
+                chunkDiv.className = 'chunk-item'
+                chunkDiv.innerHTML = `
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-cyan-400 text-xs font-medium">Chunk ${chunk.id}</span>
+                        <span class="text-slate-500 text-xs">${chunk.tokens} tokens</span>
+                    </div>
+                    <div class="text-slate-300 text-xs line-clamp-2">${chunk.content}</div>
+                `
+                
+                chunkDiv.addEventListener('click', () => {
+                    document.querySelectorAll('.chunk-item').forEach(c => c.classList.remove('active'))
+                    chunkDiv.classList.add('active')
+                })
+                
+                container.appendChild(chunkDiv)
+                
+                // 添加动画
+                chunkDiv.style.opacity = '0'
+                chunkDiv.style.transform = 'translateY(20px)'
+                
+                requestAnimationFrame(() => {
+                    chunkDiv.style.transition = 'all 0.3s ease'
+                    chunkDiv.style.opacity = '1'
+                    chunkDiv.style.transform = 'translateY(0)'
+                })
+            }
+
+            updateChunkStats(chunkCount, totalTokens) {
+                const avgSize = Math.round(totalTokens / chunkCount)
+                
+                document.getElementById('chunk-count').textContent = chunkCount
+                document.getElementById('avg-chunk-size').textContent = avgSize
+                document.getElementById('total-tokens').textContent = totalTokens.toLocaleString()
+                
+                // 添加数字动画
+                document.getElementById('chunk-count').classList.add('count-up')
+                document.getElementById('avg-chunk-size').classList.add('count-up')
+                document.getElementById('total-tokens').classList.add('count-up')
+            }
+
+            async animateProgress(element, from, to, duration) {
+                return new Promise(resolve => {
+                    const startTime = Date.now()
+                    const animate = () => {
+                        const elapsed = Date.now() - startTime
+                        const progress = Math.min(elapsed / duration, 1)
+                        const value = from + (to - from) * progress
+                        
+                        element.style.width = `${value}%`
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(animate)
+                        } else {
+                            resolve()
+                        }
+                    }
+                    animate()
+                })
+            }
+
+            async showNeuralNetwork() {
+                // 显示过渡提示
+                this.showNotification('正在构建知识图谱...', 'info')
+                
+                // 添加过渡动画到分析区域
+                const analysisSection = document.getElementById('analysis-section')
+                analysisSection.style.transition = 'all 1s ease-out'
+                analysisSection.style.transform = 'translateY(-20px)'
+                analysisSection.style.opacity = '0.5'
+                
+                await this.delay(1500)
+                
+                // 显示构建过程提示
+                this.showNotification('基于分析结果生成知识网络...', 'info')
+                
+                // 添加知识图谱构建的过渡区域
+                this.showNetworkTransition()
+                
+                await this.delay(2000)
+                
+                // 平滑隐藏分析区域，显示神经网络
+                analysisSection.classList.add('hidden')
+                document.getElementById('neural-network-section').classList.remove('hidden')
+
+                // 添加神经网络区域的入场动画
+                const networkSection = document.getElementById('neural-network-section')
+                networkSection.style.opacity = '0'
+                networkSection.style.transform = 'translateY(30px)'
+                
+                // 初始化神经网络图谱
+                this.initializeNeuralNetwork()
+                
+                // 动画显示神经网络
+                setTimeout(() => {
+                    networkSection.style.transition = 'all 1s ease-out'
+                    networkSection.style.opacity = '1'
+                    networkSection.style.transform = 'translateY(0)'
+                }, 100)
+
+                // 显示完成提示和对话区域
+                setTimeout(() => {
+                    this.showNotification('🧠 知识图谱构建完成！点击节点深度探索', 'success')
+                    
+                    // 延迟显示对话区域
+                    setTimeout(() => {
+                        document.getElementById('chat-section').classList.remove('hidden')
+                        this.addSuggestedQuestions()
+                        this.showControlButtons()
+                    }, 1500)
+                }, 2000)
+            }
+
+            showNetworkTransition() {
+                // 在分析区域下方添加过渡提示
+                const transitionDiv = document.createElement('div')
+                transitionDiv.id = 'network-transition'
+                transitionDiv.className = 'cyber-card p-6 mb-8'
+                transitionDiv.innerHTML = `
+                    <div class="text-center">
+                        <div class="mb-6">
+                            <div class="w-16 h-16 mx-auto bg-neon-gradient rounded-full flex items-center justify-center animate-pulse">
+                                <span class="text-2xl">🧠</span>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-4" style="font-family: 'Orbitron', monospace;">构建知识神经网络</h3>
+                        <p class="text-slate-400 mb-4">正在基于论文分析结果构建多维知识图谱...</p>
+                        <div class="flex justify-center space-x-2">
+                            <div class="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></div>
+                            <div class="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                            <div class="w-2 h-2 bg-green-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        </div>
+                        <div class="mt-4 text-sm text-slate-500">
+                            <div class="loading-text">正在提取核心概念</div>
+                        </div>
+                    </div>
+                `
+                
+                const analysisSection = document.getElementById('analysis-section')
+                analysisSection.parentNode.insertBefore(transitionDiv, analysisSection.nextSibling)
+                
+                // 动态更新加载文本
+                let loadingTexts = [
+                    '正在提取核心概念...',
+                    '正在建立概念关系...',
+                    '正在优化网络布局...',
+                    '正在生成交互节点...'
+                ]
+                let currentTextIndex = 0
+                
+                const loadingTextElement = transitionDiv.querySelector('.loading-text')
+                const textInterval = setInterval(() => {
+                    currentTextIndex = (currentTextIndex + 1) % loadingTexts.length
+                    loadingTextElement.textContent = loadingTexts[currentTextIndex]
+                }, 800)
+                
+                // 2秒后移除过渡元素
+                setTimeout(() => {
+                    clearInterval(textInterval)
+                    transitionDiv.style.transition = 'all 0.5s ease-out'
+                    transitionDiv.style.opacity = '0'
+                    transitionDiv.style.transform = 'translateY(-20px)'
+                    setTimeout(() => {
+                        if (transitionDiv.parentNode) {
+                            transitionDiv.parentNode.removeChild(transitionDiv)
+                        }
+                    }, 500)
+                }, 2000)
+            }
+
+            setupChat() {
+                // 预设问题按钮
+            }
+
+            setupNeuralNetwork() {
+                // 设置神经网络控制按钮
+                document.getElementById('reset-network').addEventListener('click', () => {
+                    this.resetNetworkView()
+                })
+                
+                document.getElementById('toggle-labels').addEventListener('click', () => {
+                    this.toggleNodeLabels()
+                })
+                
+                document.getElementById('auto-layout').addEventListener('click', () => {
+                    this.autoLayoutNetwork()
+                })
+                
+                document.getElementById('export-network').addEventListener('click', () => {
+                    this.exportNetwork()
+                })
+
+                // 设置面板控制
+                document.getElementById('close-panel').addEventListener('click', () => {
+                    document.getElementById('node-info-panel').classList.add('hidden')
+                })
+
+                document.getElementById('search-node').addEventListener('click', () => {
+                    this.searchNodeContent()
+                })
+
+                document.getElementById('close-search-modal').addEventListener('click', () => {
+                    document.getElementById('search-modal').classList.add('hidden')
+                })
+            }
+
+            initializeNeuralNetwork() {
+                const canvas = document.getElementById('neural-network-canvas')
+                const ctx = canvas.getContext('2d')
+                
+                // 设置画布尺寸
+                canvas.width = canvas.offsetWidth * 2
+                canvas.height = canvas.offsetHeight * 2
+                ctx.scale(2, 2)
+                
+                this.networkCanvas = canvas
+                this.networkCtx = ctx
+                this.networkData = JSON.parse(JSON.stringify(mockNetworkData))
+                this.selectedNode = null
+                this.showLabels = true
+                this.isDragging = false
+                this.dragNode = null
+                this.nodeAnimationProgress = 0 // 添加节点动画进度
+                
+                // 添加鼠标事件
+                canvas.addEventListener('mousedown', (e) => this.onMouseDown(e))
+                canvas.addEventListener('mousemove', (e) => this.onMouseMove(e))
+                canvas.addEventListener('mouseup', (e) => this.onMouseUp(e))
+                canvas.addEventListener('click', (e) => this.onNodeClick(e))
+                
+                // 开始动画循环
+                this.animateNetwork()
+                
+                // 启动节点逐个出现的动画
+                this.animateNodesAppearance()
+            }
+
+            async animateNodesAppearance() {
+                const totalNodes = this.networkData.nodes.length
+                const animationDuration = 3000 // 3秒内完成所有节点出现
+                const nodeDelay = animationDuration / totalNodes
+                
+                for (let i = 0; i < totalNodes; i++) {
+                    await this.delay(nodeDelay)
+                    this.nodeAnimationProgress = (i + 1) / totalNodes
+                    
+                    // 只显示部分重要节点的提示，避免通知过多
+                    const node = this.networkData.nodes[i]
+                    if (i === 0 || i === Math.floor(totalNodes / 2) || i === totalNodes - 1) {
+                        this.showNotification(`🧠 发现核心概念: ${node.label}`, 'info', 1500)
+                    }
+                }
+                
+                // 完成后显示总结通知
+                this.showNotification(`✨ 知识图谱构建完成，共发现 ${totalNodes} 个概念节点`, 'success', 2000)
+            }
+
+            animateNetwork() {
+                this.drawNetwork()
+                requestAnimationFrame(() => this.animateNetwork())
+            }
+
+            drawNetwork() {
+                const ctx = this.networkCtx
+                const canvas = this.networkCanvas
+                
+                // 清空画布
+                ctx.clearRect(0, 0, canvas.width / 2, canvas.height / 2)
+                
+                // 计算当前应该显示的节点数量
+                const totalNodes = this.networkData.nodes.length
+                const visibleNodeCount = Math.floor(this.nodeAnimationProgress * totalNodes)
+                const visibleNodes = this.networkData.nodes.slice(0, visibleNodeCount)
+                
+                // 绘制连接线（只绘制可见节点之间的连接）
+                this.networkData.edges.forEach(edge => {
+                    const fromNode = visibleNodes.find(n => n.id === edge.from)
+                    const toNode = visibleNodes.find(n => n.id === edge.to)
+                    
+                    if (fromNode && toNode) {
+                        ctx.strokeStyle = `rgba(0, 212, 255, ${edge.strength * 0.6})`
+                        ctx.lineWidth = edge.strength * 3
+                        ctx.beginPath()
+                        ctx.moveTo(fromNode.x, fromNode.y)
+                        ctx.lineTo(toNode.x, toNode.y)
+                        ctx.stroke()
+                    }
+                })
+                
+                // 绘制可见的节点
+                visibleNodes.forEach((node, index) => {
+                    const isSelected = this.selectedNode && this.selectedNode.id === node.id
+                    let nodeSize = isSelected ? 25 : 20
+                    
+                    // 如果是最新出现的节点，添加入场动画效果
+                    if (index === visibleNodeCount - 1 && this.nodeAnimationProgress < 1) {
+                        const progress = (this.nodeAnimationProgress * totalNodes) % 1
+                        nodeSize *= (0.3 + 0.7 * progress) // 从30%大小缩放到100%
+                        
+                        // 添加发光效果
+                        const gradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, nodeSize * 2)
+                        gradient.addColorStop(0, `${node.color}60`)
+                        gradient.addColorStop(1, 'transparent')
+                        ctx.fillStyle = gradient
+                        ctx.fillRect(node.x - nodeSize * 2, node.y - nodeSize * 2, nodeSize * 4, nodeSize * 4)
+                    }
+                    
+                    // 节点主体
+                    ctx.fillStyle = node.color
+                    ctx.beginPath()
+                    ctx.arc(node.x, node.y, nodeSize, 0, Math.PI * 2)
+                    ctx.fill()
+                    
+                    // 节点边框
+                    ctx.strokeStyle = isSelected ? '#ffffff' : 'rgba(255, 255, 255, 0.3)'
+                    ctx.lineWidth = isSelected ? 3 : 1
+                    ctx.stroke()
+                    
+                    // 节点标签
+                    if (this.showLabels) {
+                        ctx.fillStyle = '#ffffff'
+                        ctx.font = '12px Arial'
+                        ctx.textAlign = 'center'
+                        ctx.fillText(node.label, node.x, node.y + nodeSize + 15)
+                    }
+                })
+            }
+
+            onMouseDown(e) {
+                const rect = this.networkCanvas.getBoundingClientRect()
+                const x = e.clientX - rect.left
+                const y = e.clientY - rect.top
+                
+                const clickedNode = this.findNodeAt(x, y)
+                if (clickedNode) {
+                    this.isDragging = true
+                    this.dragNode = clickedNode
+                }
+            }
+
+            onMouseMove(e) {
+                if (this.isDragging && this.dragNode) {
+                    const rect = this.networkCanvas.getBoundingClientRect()
+                    this.dragNode.x = e.clientX - rect.left
+                    this.dragNode.y = e.clientY - rect.top
+                }
+            }
+
+            onMouseUp(e) {
+                this.isDragging = false
+                this.dragNode = null
+            }
+
+            onNodeClick(e) {
+                if (this.isDragging) return
+                
+                const rect = this.networkCanvas.getBoundingClientRect()
+                const x = e.clientX - rect.left
+                const y = e.clientY - rect.top
+                
+                const clickedNode = this.findNodeAt(x, y)
+                if (clickedNode) {
+                    this.selectedNode = clickedNode
+                    this.showNodeInfo(clickedNode)
+                }
+            }
+
+            findNodeAt(x, y) {
+                return this.networkData.nodes.find(node => {
+                    const dx = x - node.x
+                    const dy = y - node.y
+                    return Math.sqrt(dx * dx + dy * dy) <= 25
+                })
+            }
+
+            showNodeInfo(node) {
+                const panel = document.getElementById('node-info-panel')
+                const title = document.getElementById('node-title')
+                const content = document.getElementById('node-content')
+                
+                title.textContent = node.label
+                content.innerHTML = `
+                    <div class="mb-2">
+                        <span class="text-cyan-400 text-xs">类型:</span> 
+                        <span class="text-white">${this.getNodeTypeName(node.type)}</span>
+                    </div>
+                    <div class="text-slate-300">${node.description}</div>
+                `
+                
+                panel.classList.remove('hidden')
+                this.currentSearchNode = node
+            }
+
+            getNodeTypeName(type) {
+                const typeNames = {
+                    concept: '核心概念',
+                    method: '研究方法',
+                    result: '实验结果',
+                    term: '关键术语',
+                    application: '应用领域'
+                }
+                return typeNames[type] || type
+            }
+
+            async searchNodeContent() {
+                if (!this.currentSearchNode) return
+                
+                const modal = document.getElementById('search-modal')
+                const results = document.getElementById('search-results')
+                
+                modal.classList.remove('hidden')
+                results.innerHTML = '<div class="text-center text-slate-400">🔍 正在搜索相关内容...</div>'
+                
+                // 模拟搜索延迟
+                await this.delay(2000)
+                
+                // 生成模拟搜索结果
+                const searchResults = this.generateSearchResults(this.currentSearchNode)
+                results.innerHTML = searchResults
+            }
+
+            generateSearchResults(node) {
+                const mockResults = [
+                    {
+                        title: `${node.label} - 维基百科`,
+                        url: `https://en.wikipedia.org/wiki/${node.label.replace(' ', '_')}`,
+                        snippet: `${node.description} 这是一个在计算机科学和人工智能领域非常重要的概念，广泛应用于各种实际场景中。`
+                    },
+                    {
+                        title: `${node.label} 最新研究进展 - arXiv`,
+                        url: `https://arxiv.org/search/?query=${node.label}`,
+                        snippet: `最新的学术论文和研究进展，包含了${node.label}在不同领域的创新应用和技术突破。`
+                    },
+                    {
+                        title: `${node.label} 实践指南 - GitHub`,
+                        url: `https://github.com/search?q=${node.label}`,
+                        snippet: `开源项目和代码实现，提供了${node.label}的实际应用案例和最佳实践。`
+                    }
+                ]
+
+                return mockResults.map(result => `
+                    <div class="mb-6 p-4 bg-slate-800/30 rounded-lg border border-slate-700/50 hover:border-cyan-400/30 transition-colors">
+                        <h4 class="text-cyan-400 font-semibold mb-2">${result.title}</h4>
+                        <p class="text-slate-300 text-sm mb-2">${result.snippet}</p>
+                        <a href="${result.url}" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm">
+                            ${result.url} →
+                        </a>
+                    </div>
+                `).join('')
+            }
+
+            resetNetworkView() {
+                this.networkData = JSON.parse(JSON.stringify(mockNetworkData))
+                this.selectedNode = null
+                document.getElementById('node-info-panel').classList.add('hidden')
+                this.showNotification('网络视图已重置', 'info')
+            }
+
+            toggleNodeLabels() {
+                this.showLabels = !this.showLabels
+                this.showNotification(this.showLabels ? '标签已显示' : '标签已隐藏', 'info')
+            }
+
+            autoLayoutNetwork() {
+                this.showNotification('自动布局完成', 'success')
+            }
+
+            exportNetwork() {
+                const canvas = this.networkCanvas
+                const link = document.createElement('a')
+                link.download = 'neural-network.png'
+                link.href = canvas.toDataURL()
+                link.click()
+                
+                this.showNotification('图谱已导出', 'success')
+            }
+
+            async addSuggestedQuestions() {
+                await this.delay(500) // 稍等一下再显示建议问题
+                
+                const suggestedQuestions = [
+                    "这篇论文的主要创新点是什么？",
+                    "研究方法有哪些优势和局限性？", 
+                    "实验结果支持作者的结论吗？",
+                    "这项研究对该领域有什么影响？",
+                    "论文中提到的未来工作方向有哪些？"
+                ]
+
+                // 先显示打字机文本
+                await this.addMessageWithTypewriter("我已经深度分析了这篇论文，您可以向我提问任何相关问题。以下是一些建议的问题，点击即可快速提问：", 'ai')
+                
+                await this.delay(800) // 等文本显示完后再显示按钮
+
+                const chatMessages = document.getElementById('chat-messages')
+                const suggestionsDiv = document.createElement('div')
+                suggestionsDiv.className = 'message-bubble message-ai'
+                suggestionsDiv.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center mr-3 mt-1">
+                            <span class="text-white text-sm">💡</span>
+                        </div>
+                        <div>
+                            <p class="text-slate-300 mb-3 font-semibold">🔍 快速提问</p>
+                            <div class="grid gap-2">
+                                ${suggestedQuestions.map((q, index) => `
+                                    <button onclick="app.askQuestion('${q}')" 
+                                            class="text-left p-3 bg-gradient-to-r from-slate-700/20 to-slate-600/20 hover:from-slate-600/40 hover:to-slate-500/40 rounded-lg border border-slate-600/30 hover:border-cyan-500/50 text-slate-300 hover:text-white transition-all text-sm transform hover:scale-[1.02] hover:shadow-lg"
+                                            style="animation: slideInUp 0.3s ease-out ${index * 0.1}s both;">
+                                        <div class="flex items-center">
+                                            <span class="text-cyan-400 mr-2">Q${index + 1}:</span>
+                                            <span>${q}</span>
+                                        </div>
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `
+
+                chatMessages.appendChild(suggestionsDiv)
+                chatMessages.scrollTop = chatMessages.scrollHeight
+            }
+
+            askQuestion(question) {
+                document.getElementById('chat-input').value = question
+                this.sendMessage()
+            }
+
+            async sendMessage() {
+                const input = document.getElementById('chat-input')
+                const message = input.value.trim()
+                
+                if (!message) return
+
+                // 添加用户消息
+                this.addMessage(message, 'user')
+                input.value = ''
+
+                // 显示输入指示器
+                const typingIndicator = this.showTypingIndicator()
+
+                // 模拟API调用延迟
+                await this.delay(1500)
+
+                // 移除输入指示器
+                typingIndicator.remove()
+
+                // 生成AI回复
+                const aiResponse = this.generateAIResponse(message)
+                this.addMessageWithTypewriter(aiResponse, 'ai')
+            }
+
+            addMessage(content, sender, isTemporary = false) {
+                const chatMessages = document.getElementById('chat-messages')
+                const messageDiv = document.createElement('div')
+                messageDiv.className = `message-bubble mb-4 ${sender === 'user' ? 'message-user flex justify-end' : 'message-ai flex justify-start'}`
+
+                if (sender === 'user') {
+                    messageDiv.innerHTML = `
+                        <div class="flex items-end max-w-md">
+                            <div class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-4 py-2 rounded-2xl rounded-br-md shadow-lg text-sm leading-relaxed">
+                                ${content}
+                            </div>
+                            <div class="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center ml-2 flex-shrink-0">
+                                <span class="text-white text-xs">👤</span>
+                            </div>
+                        </div>
+                    `
+                } else {
+                    messageDiv.innerHTML = `
+                        <div class="flex items-start max-w-3xl">
+                            <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                                <span class="text-white text-xs">🤖</span>
+                            </div>
+                            <div class="bg-slate-800/60 border border-slate-700/50 text-slate-200 px-4 py-2 rounded-2xl rounded-tl-md shadow-lg text-sm leading-relaxed">
+                                ${this.formatMessageContent(content)}
+                            </div>
+                        </div>
+                    `
+                }
+
+                chatMessages.appendChild(messageDiv)
+                chatMessages.scrollTop = chatMessages.scrollHeight
+
+                return messageDiv
+            }
+
+            // 格式化消息内容
+            formatMessageContent(content) {
+                return content
+                    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-cyan-300 font-semibold">$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em class="text-slate-300 italic">$1</em>')
+                    .replace(/\n\n/g, '</p><p class="mt-3">')
+                    .replace(/\n/g, '<br>')
+                    .replace(/^/, '<p>')
+                    .replace(/$/, '</p>')
+            }
+
+            generateAIResponse(question) {
+                // 简单的问题匹配和回复生成
+                const responses = {
+                    '创新': '这篇论文的主要创新点包括：\n\n1. **多模态融合技术**：首次将文本、图表和公式进行统一建模\n2. **三维分析框架**：从内容、方法、价值三个维度进行综合评估\n3. **大规模预训练**：基于100万篇论文的深度学习模型\n\n这些创新点使得论文分析的准确率达到89.3%，显著超越了传统方法。',
+                    
+                    '方法': '研究方法的分析如下：\n\n**优势：**\n- ✅ 采用了最先进的Transformer架构\n- ✅ 大规模数据训练保证了模型泛化能力\n- ✅ 多模态处理能力强\n\n**局限性：**\n- ⚠️ 计算资源需求较高\n- ⚠️ 对特定领域论文的适应性有待提升\n- ⚠️ 缺乏对论文质量的主观评价维度',
+                    
+                    '结果': '实验结果强有力地支持了作者的结论：\n\n- **准确率指标**：在多个benchmark上达到SOTA水平\n- **效率提升**：相比人工分析提升80%的处理速度\n- **用户评价**：85%的专家认为分析结果有价值\n\n数据充分，实验设计合理，结论可信度高。',
+                    
+                    '影响': '这项研究对学术界的影响是深远的：\n\n🔬 **学术价值**：推动了AI在学术分析领域的应用\n🏭 **产业影响**：为学术服务平台提供了技术参考\n📚 **教育意义**：帮助研究者更好地理解论文质量评估\n\n预计将在未来3-5年内得到广泛应用。',
+                    
+                    '未来': '论文提到的未来工作方向包括：\n\n1. **跨语言支持**：扩展到更多语言的论文分析\n2. **实时分析**：开发流式处理能力\n3. **个性化评估**：根据用户专业背景调整分析维度\n4. **协作分析**：支持多人协同评估\n\n这些方向都具有很好的研究价值和应用前景。'
+                }
+
+                // 简单匹配
+                for (const [key, response] of Object.entries(responses)) {
+                    if (question.includes(key)) {
+                        return response
+                    }
+                }
+
+                // 默认回复
+                return `关于您的问题"${question}"，基于我对这篇论文的分析：\n\n这是一篇高质量的学术论文，主要研究了基于深度学习的论文智能分析方法。论文在技术创新、实验设计和应用价值方面都表现出色。\n\n如果您需要了解更具体的内容，请尝试问一些更具体的问题，比如关于研究方法、实验结果或者应用前景等方面。`
+            }
+
+            showNotification(message, type = 'info', duration = 3000) {
+                // 确保通知容器存在
+                this.ensureNotificationContainer()
+                
+                const notification = document.createElement('div')
+                notification.className = `notification-item p-4 rounded-lg border backdrop-blur-sm transform translate-x-full transition-all duration-300 mb-3 shadow-lg`
+                
+                const colors = {
+                    success: 'bg-green-500/20 border-green-500/50 text-green-400',
+                    error: 'bg-red-500/20 border-red-500/50 text-red-400',
+                    info: 'bg-blue-500/20 border-blue-500/50 text-blue-400'
+                }
+                
+                const icons = {
+                    success: '✅',
+                    error: '❌', 
+                    info: 'ℹ️'
+                }
+                
+                notification.className += ` ${colors[type]}`
+                notification.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="mr-2">${icons[type]}</span>
+                        <span class="flex-1">${message}</span>
+                        <button onclick="this.parentElement.parentElement.remove(); app.updateNotificationPositions()" class="ml-2 text-slate-400 hover:text-white">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </div>
+                `
+
+                const container = document.getElementById('notification-container')
+                container.appendChild(notification)
+
+                // 更新所有通知位置
+                this.updateNotificationPositions()
+
+                // 显示动画
+                setTimeout(() => {
+                    notification.classList.remove('translate-x-full')
+                }, 100)
+
+                // 自动消失
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        notification.style.transition = 'all 0.3s ease-out'
+                        notification.style.opacity = '0'
+                        notification.style.transform = 'translateX(100%) scale(0.9)'
+                        
+                        setTimeout(() => {
+                            if (document.body.contains(notification)) {
+                                notification.remove()
+                                this.updateNotificationPositions()
+                            }
+                        }, 300)
+                    }
+                }, duration)
+            }
+
+            // 确保通知容器存在
+            ensureNotificationContainer() {
+                if (!document.getElementById('notification-container')) {
+                    const container = document.createElement('div')
+                    container.id = 'notification-container'
+                    container.className = 'fixed top-4 right-4 z-50 max-w-sm'
+                    
+                    // 添加清除所有通知的按钮
+                    const clearButton = document.createElement('div')
+                    clearButton.id = 'clear-all-notifications'
+                    clearButton.className = 'hidden text-center mb-2'
+                    clearButton.innerHTML = `
+                        <button onclick="app.clearAllNotifications()" class="px-3 py-1 bg-slate-700/50 border border-slate-600/50 rounded text-slate-300 hover:bg-slate-600/50 transition-all text-xs">
+                            <i class="fas fa-times mr-1"></i>清除所有
+                        </button>
+                    `
+                    container.appendChild(clearButton)
+                    
+                    document.body.appendChild(container)
+                }
+            }
+
+            // 清除所有通知
+            clearAllNotifications() {
+                const container = document.getElementById('notification-container')
+                if (!container) return
+                
+                const notifications = container.querySelectorAll('.notification-item')
+                notifications.forEach((notification, index) => {
+                    setTimeout(() => {
+                        if (document.body.contains(notification)) {
+                            notification.style.transition = 'all 0.2s ease-out'
+                            notification.style.opacity = '0'
+                            notification.style.transform = 'translateX(100%) scale(0.8)'
+                            
+                            setTimeout(() => {
+                                if (document.body.contains(notification)) {
+                                    notification.remove()
+                                }
+                            }, 200)
+                        }
+                    }, index * 50) // 依次消失
+                })
+                
+                // 隐藏清除按钮
+                setTimeout(() => {
+                    const clearButton = document.getElementById('clear-all-notifications')
+                    if (clearButton) {
+                        clearButton.classList.add('hidden')
+                    }
+                }, notifications.length * 50 + 200)
+            }
+
+            // 更新通知位置
+            updateNotificationPositions() {
+                const container = document.getElementById('notification-container')
+                if (!container) return
+                
+                const notifications = container.querySelectorAll('.notification-item')
+                const clearButton = document.getElementById('clear-all-notifications')
+                
+                // 显示或隐藏清除所有按钮
+                if (clearButton) {
+                    if (notifications.length >= 2) {
+                        clearButton.classList.remove('hidden')
+                    } else {
+                        clearButton.classList.add('hidden')
+                    }
+                }
+                
+                notifications.forEach((notification, index) => {
+                    // 添加进入动画的延迟，让通知依次出现
+                    notification.style.animationDelay = `${index * 0.1}s`
+                    
+                    // 如果有超过5个通知，移除最旧的
+                    if (notifications.length > 5 && index === 0) {
+                        notification.style.opacity = '0'
+                        notification.style.transform = 'translateX(100%) scale(0.8)'
+                        setTimeout(() => {
+                            if (document.body.contains(notification)) {
+                                notification.remove()
+                                this.updateNotificationPositions()
+                            }
+                        }, 200)
+                    }
+                })
+            }
+
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes'
+                const k = 1024
+                const sizes = ['Bytes', 'KB', 'MB', 'GB']
+                const i = Math.floor(Math.log(bytes) / Math.log(k))
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+            }
+
+            // 显示控制按钮
+            showControlButtons() {
+                document.getElementById('restart-analysis').classList.remove('hidden')
+                document.getElementById('new-document').classList.remove('hidden')
+            }
+
+            // 重新分析当前文档
+            restartAnalysis() {
+                if (confirm('确定要重新分析当前文档吗？这将清除当前的分析结果并重新开始整个流程。')) {
+                    this.resetToAnalysis()
+                    this.showNotification('🔄 重新开始分析当前文档...', 'info')
+                    
+                    // 重新开始分析流程
+                    setTimeout(() => {
+                        this.simulateChunking()
+                    }, 1000)
+                }
+            }
+
+            // 上传新文档
+            uploadNewDocument() {
+                if (confirm('确定要上传新文档吗？这将清除当前的所有数据并返回上传界面。')) {
+                    this.resetToUpload()
+                    this.showNotification('📄 系统已重置，请上传新文档', 'success')
+                }
+            }
+
+            // 重置到分析阶段（保留已上传的文档）
+            resetToAnalysis() {
+                // 隐藏分析后的区域
+                document.getElementById('analysis-section').classList.add('hidden')
+                document.getElementById('neural-network-section').classList.add('hidden')
+                document.getElementById('chat-section').classList.add('hidden')
+                
+                // 显示文档分割区域
+                document.getElementById('chunking-section').classList.remove('hidden')
+                
+                // 隐藏控制按钮
+                document.getElementById('restart-analysis').classList.add('hidden')
+                document.getElementById('new-document').classList.add('hidden')
+                
+                // 重置分割区域内容
+                const chunkContainer = document.getElementById('chunk-container')
+                chunkContainer.innerHTML = ''
+                
+                // 重置统计信息
+                document.getElementById('chunk-count').textContent = '0'
+                document.getElementById('avg-chunk-size').textContent = '0'
+                document.getElementById('total-tokens').textContent = '0'
+                
+                // 重置文档结构状态
+                document.querySelectorAll('.doc-section').forEach(section => {
+                    section.classList.remove('processing', 'completed')
+                })
+                
+                // 清空聊天记录
+                const chatMessages = document.getElementById('chat-messages')
+                if (chatMessages) {
+                    chatMessages.innerHTML = ''
+                }
+                
+                // 重置状态变量
+                this.currentStage = 'chunking'
+                this.analysisComplete = false
+                this.nodeAnimationProgress = 0
+                
+                // 清除正在运行的动画
+                if (this.chunkingInterval) {
+                    clearInterval(this.chunkingInterval)
+                }
+            }
+
+            // 重置到上传阶段
+            resetToUpload() {
+                // 隐藏所有分析区域
+                document.getElementById('chunking-section').classList.add('hidden')
+                document.getElementById('analysis-section').classList.add('hidden')
+                document.getElementById('neural-network-section').classList.add('hidden')
+                document.getElementById('chat-section').classList.add('hidden')
+                
+                // 显示上传区域
+                document.getElementById('upload-section').classList.remove('hidden')
+                
+                // 隐藏控制按钮
+                document.getElementById('restart-analysis').classList.add('hidden')
+                document.getElementById('new-document').classList.add('hidden')
+                
+                // 重置上传区域状态
+                const uploadArea = document.getElementById('upload-area')
+                uploadArea.className = 'border-2 border-dashed border-slate-600 rounded-lg p-8 text-center transition-all hover:border-cyan-500 hover:bg-cyan-500/5'
+                uploadArea.innerHTML = `
+                    <div class="mb-4">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-slate-400 mb-4 block"></i>
+                        <p class="text-lg text-slate-300 mb-2">拖拽文件到此处或点击上传</p>
+                        <p class="text-sm text-slate-500">支持 PDF、DOC、DOCX 格式</p>
+                    </div>
+                    <button class="cyber-button">
+                        <i class="fas fa-folder-open mr-2"></i>选择文件
+                    </button>
+                `
+                
+                // 清空聊天记录
+                const chatMessages = document.getElementById('chat-messages')
+                if (chatMessages) {
+                    chatMessages.innerHTML = ''
+                }
+                
+                // 重置所有状态变量
+                this.uploadedFile = null
+                this.currentStage = 'upload'
+                this.analysisComplete = false
+                this.nodeAnimationProgress = 0
+                
+                // 清除任何正在运行的动画
+                if (this.chunkingInterval) {
+                    clearInterval(this.chunkingInterval)
+                }
+                
+                // 重新绑定上传事件
+                this.setupFileUpload()
+            }
+
+            // 导出当前会话
+            exportCurrentSession() {
+                const sessionData = {
+                    timestamp: new Date().toISOString(),
+                    fileName: this.uploadedFile ? this.uploadedFile.name : 'unknown',
+                    chatHistory: this.getChatHistory(),
+                    networkData: this.networkData,
+                    analysisStage: this.currentStage
+                }
+
+                const dataStr = JSON.stringify(sessionData, null, 2)
+                const dataBlob = new Blob([dataStr], {type: 'application/json'})
+                
+                const url = URL.createObjectURL(dataBlob)
+                const link = document.createElement('a')
+                link.href = url
+                link.download = `文献榨汁机_会话记录_${new Date().getTime()}.json`
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+                URL.revokeObjectURL(url)
+                
+                this.showNotification('📄 会话记录已导出', 'success')
+            }
+
+            // 获取聊天历史
+            getChatHistory() {
+                const chatMessages = document.getElementById('chat-messages')
+                const messages = []
+                
+                if (chatMessages) {
+                    const messageElements = chatMessages.querySelectorAll('.message-bubble')
+                    messageElements.forEach(msg => {
+                        const isAI = msg.classList.contains('message-ai')
+                        const textContent = msg.textContent.trim()
+                        if (textContent) {
+                            messages.push({
+                                type: isAI ? 'ai' : 'user',
+                                content: textContent,
+                                timestamp: new Date().toISOString()
+                            })
+                        }
+                    })
+                }
+                
+                return messages
+            }
+
+            // 显示输入指示器
+            showTypingIndicator() {
+                const chatMessages = document.getElementById('chat-messages')
+                const indicatorDiv = document.createElement('div')
+                indicatorDiv.className = 'message-bubble message-ai'
+                indicatorDiv.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center mr-3 mt-1">
+                            <span class="text-white text-sm">🤖</span>
+                        </div>
+                        <div class="typing-indicator">
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                    </div>
+                `
+                
+                chatMessages.appendChild(indicatorDiv)
+                chatMessages.scrollTop = chatMessages.scrollHeight
+                
+                return indicatorDiv
+            }
+
+            // 添加带打字机效果的消息
+            async addMessageWithTypewriter(content, sender) {
+                const chatMessages = document.getElementById('chat-messages')
+                const messageDiv = document.createElement('div')
+                messageDiv.className = `message-bubble mb-4 ${sender === 'user' ? 'message-user flex justify-end' : 'message-ai flex justify-start'}`
+
+                if (sender === 'ai') {
+                    messageDiv.innerHTML = `
+                        <div class="flex items-start max-w-3xl">
+                            <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                                <span class="text-white text-xs">🤖</span>
+                            </div>
+                            <div class="bg-slate-800/60 border border-slate-700/50 text-slate-200 px-4 py-2 rounded-2xl rounded-tl-md shadow-lg typewriter text-sm leading-relaxed">
+                                <span class="typewriter-text"></span>
+                                <span class="typewriter-cursor"></span>
+                            </div>
+                        </div>
+                    `
+                } else {
+                    messageDiv.innerHTML = `
+                        <div class="flex items-end max-w-md">
+                            <div class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-4 py-2 rounded-2xl rounded-br-md shadow-lg typewriter text-sm leading-relaxed">
+                                <span class="typewriter-text"></span>
+                                <span class="typewriter-cursor"></span>
+                            </div>
+                            <div class="w-8 h-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center ml-2 flex-shrink-0">
+                                <span class="text-white text-xs">👤</span>
+                            </div>
+                        </div>
+                    `
+                }
+
+                chatMessages.appendChild(messageDiv)
+                chatMessages.scrollTop = chatMessages.scrollHeight
+
+                // 开始打字机动画
+                const textElement = messageDiv.querySelector('.typewriter-text')
+                await this.typewriterAnimation(textElement, content)
+                
+                // 移除光标并格式化最终内容
+                const cursor = messageDiv.querySelector('.typewriter-cursor')
+                if (cursor) {
+                    cursor.remove()
+                }
+                
+                // 最终格式化内容
+                if (sender === 'ai') {
+                    textElement.innerHTML = this.formatMessageContent(content)
+                } else {
+                    textElement.textContent = content
+                }
+
+                return messageDiv
+            }
+
+            // 打字机动画 - 只处理纯文本
+            async typewriterAnimation(element, text, speed = 25) {
+                element.textContent = ''
+                
+                // 清理文本，移除markdown标记用于打字效果
+                const cleanText = text
+                    .replace(/\*\*(.*?)\*\*/g, '$1')  // 移除粗体标记
+                    .replace(/\*(.*?)\*/g, '$1')     // 移除斜体标记
+                    .replace(/\n+/g, ' ')            // 将换行符替换为空格
+                
+                for (let i = 0; i < cleanText.length; i++) {
+                    element.textContent += cleanText[i]
+                    
+                    // 滚动到底部
+                    const chatMessages = document.getElementById('chat-messages')
+                    chatMessages.scrollTop = chatMessages.scrollHeight
+                    
+                    // 根据字符类型调整速度
+                    let delay = speed
+                    if (cleanText[i] === '。' || cleanText[i] === '！' || cleanText[i] === '？') {
+                        delay = speed * 4 // 句号等停顿更长
+                    } else if (cleanText[i] === '，' || cleanText[i] === '；' || cleanText[i] === '：') {
+                        delay = speed * 2.5 // 逗号等中等停顿
+                    } else if (cleanText[i] === ' ') {
+                        delay = speed * 0.3 // 空格快一些
+                    } else if (/[a-zA-Z]/.test(cleanText[i])) {
+                        delay = speed * 0.6 // 英文字母快一些
+                    }
+                    
+                    await this.delay(delay)
+                }
+            }
+
+            // 设置键盘快捷键
+            setupKeyboardShortcuts() {
+                document.addEventListener('keydown', (e) => {
+                    // Ctrl+R: 重新分析
+                    if (e.ctrlKey && e.key === 'r') {
+                        e.preventDefault()
+                        if (document.getElementById('restart-analysis').offsetParent !== null) {
+                            this.restartAnalysis()
+                        }
+                    }
+                    
+                    // Ctrl+N: 新文档
+                    if (e.ctrlKey && e.key === 'n') {
+                        e.preventDefault()
+                        if (document.getElementById('new-document').offsetParent !== null) {
+                            this.uploadNewDocument()
+                        }
+                    }
+                    
+                    // Escape: 关闭模态框
+                    if (e.key === 'Escape') {
+                        const modal = document.getElementById('search-modal')
+                        if (modal && !modal.classList.contains('hidden')) {
+                            modal.classList.add('hidden')
+                        }
+                    }
+                })
+            }
+
+            delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms))
+            }
+        }
+
+        // 初始化应用
+        window.app = new LiteratureJuicerApp()
+
+        // 添加一些背景动效
+        document.addEventListener('DOMContentLoaded', () => {
+            // 鼠标移动效果
+            document.addEventListener('mousemove', (e) => {
+                const x = e.clientX / window.innerWidth
+                const y = e.clientY / window.innerHeight
+                
+                document.documentElement.style.setProperty('--mouse-x', x)
+                document.documentElement.style.setProperty('--mouse-y', y)
+            })
+        })
+    </script>
+</body>
+</html>
