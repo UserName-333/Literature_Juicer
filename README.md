@@ -24,11 +24,16 @@
 
 ```
 literature-juicer/
-├── index.html              # 主页面
+├── index.html              # 入口选择页面  
+├── start.html              # 主应用页面
+├── 文献榨汁机.html           # 产品宣传页面
+├── ChatPaper (1).yml       # Dify工作流配置文件
 ├── package.json            # 项目配置
 ├── vite.config.js          # Vite配置
 ├── tailwind.config.js      # TailwindCSS配置
 ├── postcss.config.js       # PostCSS配置
+├── .gitignore             # Git忽略文件
+├── deploy-commands.md      # 部署命令指南
 └── src/
     ├── main.js            # 主要JavaScript逻辑
     └── style.css          # 自定义样式和TailwindCSS
@@ -36,24 +41,33 @@ literature-juicer/
 
 ## 🚀 快速开始
 
-### 安装依赖
+### 方式一：直接运行（推荐）
+项目是纯静态网站，可以直接在浏览器中打开：
+
+```bash
+# 直接打开入口页面
+open index.html
+# 或者直接访问主应用
+open start.html
+# 或者查看产品介绍
+open 文献榨汁机.html
+```
+
+### 方式二：本地服务器（可选）
+
+```bash
+# 使用Python启动本地服务器
+python -m http.server 8000
+# 或使用Node.js
+npx serve .
+# 然后访问 http://localhost:8000
+```
+
+### 开发环境（如需修改样式）
 
 ```bash
 npm install
-```
-
-### 启动开发服务器
-
-```bash
 npm run dev
-```
-
-访问 http://localhost:3000 查看效果
-
-### 构建生产版本
-
-```bash
-npm run build
 ```
 
 ## 🎮 使用说明
@@ -155,6 +169,40 @@ MIT License
 ## 🤝 贡献
 
 欢迎提交问题和功能请求！
+
+---
+
+## 🌐 部署指南
+
+### 在线部署（推荐方案）
+
+#### 1. Vercel部署（最简单）
+1. 访问 [vercel.com](https://vercel.com)
+2. 用GitHub账号登录
+3. 点击"Import Project"导入您的仓库
+4. 直接部署，无需配置
+
+#### 2. Netlify部署
+1. 访问 [netlify.com](https://netlify.com)
+2. 连接GitHub仓库
+3. 部署设置：
+   - Build command: 留空
+   - Publish directory: `/` (根目录)
+
+#### 3. GitHub Pages
+1. 仓库设置 → Pages
+2. Source选择"Deploy from a branch"
+3. Branch选择"main"
+4. 访问: `https://您的用户名.github.io/仓库名`
+
+#### 4. Surge.sh（命令行部署）
+```bash
+npm install -g surge
+surge .
+```
+
+### 自定义域名
+在Vercel/Netlify中可以轻松绑定自定义域名，支持免费SSL证书。
 
 ---
 
